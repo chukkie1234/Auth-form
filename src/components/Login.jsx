@@ -8,6 +8,7 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+import { loginAccount, setToken } from "../api";
 
 function Login( { onNavigate }) {
   const [email, setEmail] = useState("");
@@ -16,17 +17,16 @@ function Login( { onNavigate }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
+    const identifier = email.trim();
 
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Please enter a valid email address";
+    if (!identifier) {
+      newErrors.email = "Email or phone number is required";
     }
 
     if (!password) {
@@ -34,16 +34,17 @@ function Login( { onNavigate }) {
     }
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-    if (Object.keys(newErrors).length === 0) {
-      console.log({
-        email,
-        password,
-        rememberMe,
-      });
-
-      setMessage("Sign in successful!");
+    setSubmitting(true);
+    try {
+      const result = await loginAccount(identifier, password);
+      setToken(result.data?.accessToken);
       onNavigate("dashboard");
+    } catch (error) {
+      setErrors({ form: error.message });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -245,12 +246,12 @@ function Login( { onNavigate }) {
           <div className="form-group">
 
             <label htmlFor="email">
-              Email Address
+              Email or phone number
             </label>
 
             <input
               id="email"
-              type="email"
+              type="text"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -336,11 +337,16 @@ function Login( { onNavigate }) {
 
           {/* Sign In */}
 
+          {errors.form && (
+            <p className="error-message">{errors.form}</p>
+          )}
+
           <button
             type="submit"
             className="sign-in-button"
+            disabled={submitting}
           >
-            Sign In →
+            {submitting ? "Signing in..." : "Sign In →"}
           </button>
 
         </form>

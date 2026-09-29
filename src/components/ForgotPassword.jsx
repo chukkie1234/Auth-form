@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { forgotPassword } from "../api";
 
 function ForgotPassword({ onNavigate }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
@@ -21,12 +23,19 @@ function ForgotPassword({ onNavigate }) {
       return;
     }
 
-    setMessage("A password reset code has been sent to your email.");
-
-    console.log("Password reset requested for:", email);
-    setTimeout(() => {
-      onNavigate("otp");
-    }, 1000);
+    setSubmitting(true);
+    try {
+      const result = await forgotPassword(email.trim());
+      setMessage(result.message);
+      onNavigate("reset", {
+        email: email.trim(),
+        token: result.data?.resetToken || "",
+      });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -104,8 +113,9 @@ function ForgotPassword({ onNavigate }) {
         <button
           type="submit"
           className="auth-primary-button"
+          disabled={submitting}
         >
-          Send Reset Code →
+          {submitting ? "Sending..." : "Send Reset Link →"}
         </button>
       </form>
       <button

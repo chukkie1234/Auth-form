@@ -1,26 +1,34 @@
 import { useState } from "react";
+import { resetPassword } from "../api";
 
-function ResetPassword({ onNavigate }) {
+function ResetPassword({ onNavigate, token: initialToken }) {
+  const [token, setToken] = useState(initialToken || "");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
     setMessage("");
+
+    if (!token.trim()) {
+      setError("Enter the reset token from your email.");
+      return;
+    }
 
     if (!newPassword || !confirmPassword) {
       setError("Please fill in both password fields.");
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (newPassword.length < 6 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      setError("Password must be at least 6 characters and include an uppercase letter and a number.");
       return;
     }
 
@@ -29,11 +37,18 @@ function ResetPassword({ onNavigate }) {
       return;
     }
 
-    setMessage("Your password has been reset successfully.");
-
-    setTimeout(() => {
-      onNavigate("login");
-    }, 1200);
+    setSubmitting(true);
+    try {
+      const result = await resetPassword(token.trim(), newPassword);
+      setMessage(result.message);
+      setTimeout(() => {
+        onNavigate("login");
+      }, 1200);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -81,6 +96,20 @@ function ResetPassword({ onNavigate }) {
           </p>
 
           <form onSubmit={handleSubmit}>
+            <div className="reset-form-group">
+              <label htmlFor="reset-token">
+                Reset token
+              </label>
+              <input
+                id="reset-token"
+                className="token-input"
+                type="text"
+                placeholder="Paste the token from your email"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+              />
+            </div>
+
             <div className="reset-form-group">
               <label htmlFor="new-password">
                 New Password
@@ -146,8 +175,9 @@ function ResetPassword({ onNavigate }) {
             <button
               type="submit"
               className="reset-button"
+              disabled={submitting}
             >
-              Reset Password →
+              {submitting ? "Resetting..." : "Reset Password →"}
             </button>
           </form>
 

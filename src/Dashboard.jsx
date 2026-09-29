@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getCurrentUser, logoutAccount, setToken, updateProfile } from "./api";
 
 function Dashboard({ onNavigate }) {
   const [showBalance, setShowBalance] = useState(true);
@@ -11,6 +12,30 @@ function Dashboard({ onNavigate }) {
   useEffect(() => {
     localStorage.setItem("nexoraBalance", balance);
   }, [balance]);
+
+  useEffect(() => {
+    let active = true;
+
+    getCurrentUser()
+      .then((result) => {
+        if (!active) return;
+        const profile = result.data || {};
+        setUser(profile);
+        setSettingsName(profile.firstName || "");
+        setSettingsLastName(profile.lastName || "");
+        setSettingsPhone(profile.phoneNumber || "");
+        setSettingsEmail(profile.email || "");
+      })
+      .catch(() => {
+        if (!active) return;
+        setToken(null);
+        onNavigate("login");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [onNavigate]);
 
   const [showAddMoney, setShowAddMoney] = useState(false);
   const [addAmount, setAddAmount] = useState("");
@@ -27,9 +52,12 @@ function Dashboard({ onNavigate }) {
   const [toast, setToast] = useState(null);
   const [toastTimer, setToastTimer] =useState(null);
   const [section, setSection] = useState("dashboard");
-  const [settingsName, setSettingsName] = useState("Joshua");
-  const [settingsEmail, setSettingsEmail] = useState("joshua@nexora.com");
-  const [notificationsOn, setNotificationsOn] = useState(true);
+  const [user, setUser] = useState(null);
+  const [settingsName, setSettingsName] = useState("");
+  const [settingsLastName, setSettingsLastName] = useState("");
+  const [settingsPhone, setSettingsPhone] = useState("");
+  const [settingsEmail, setSettingsEmail] = useState("");
+  const [profileError, setProfileError] = useState("");
 
   const menuItems = [
     { id: "dashboard", icon: "⌂", label: "Dashboard" },
@@ -280,7 +308,15 @@ return (
 
         <button
           className="dashboard-logout"
-          onClick={() => onNavigate("login")}
+          onClick={async () => {
+            try {
+              await logoutAccount();
+            } catch {
+              // The local session is cleared either way.
+            }
+            setToken(null);
+            onNavigate("login");
+          }}
         >
           <span>↪️</span>
           Logout
@@ -294,7 +330,11 @@ return (
         <header className="dashboard-header">
           <div>
             <p className="dashboard-greeting">{sectionCopy[section].greeting}</p>
-            <h1>{sectionCopy[section].title}</h1>
+            <h1>
+              {section === "dashboard"
+                ? `Welcome back, ${user?.firstName || "there"}`
+                : sectionCopy[section].title}
+            </h1>
           </div>
 
           <div className="dashboard-header-actions">
@@ -303,10 +343,12 @@ return (
             </button>
 
             <div className="dashboard-profile">
-              <div className="dashboard-avatar">J</div>
+              <div className="dashboard-avatar">
+                {(user?.firstName || "N").charAt(0).toUpperCase()}
+              </div>
               <div>
-                <strong>Joshua</strong>
-                <span>Personal Account</span>
+                <strong>{user?.firstName || "Account"}</strong>
+                <span>{user?.email || "Personal Account"}</span>
               </div>
             </div>
           </div>
@@ -1013,17 +1055,28 @@ return (
           <section className="dashboard-panel settings-panel">
             <form
               className="settings-form"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                showToast(
-                  "success",
-                  "Settings saved",
-                  "Your preferences have been updated."
-                );
+                setProfileError("");
+                try {
+                  const result = await updateProfile({
+                    firstName: settingsName.trim(),
+                    lastName: settingsLastName.trim(),
+                    phoneNumber: settingsPhone.trim(),
+                  });
+                  setUser(result.data);
+                  showToast(
+                    "success",
+                    "Profile updated",
+                    result.message || "Your profile has been updated."
+                  );
+                } catch (error) {
+                  setProfileError(error.message);
+                }
               }}
             >
               <div className="form-group">
-                <label htmlFor="settings-name">Display name</label>
+                <label htmlFor="settings-name">First name</label>
                 <input
                   id="settings-name"
                   type="text"
@@ -1033,26 +1086,39 @@ return (
               </div>
 
               <div className="form-group">
+                <label htmlFor="settings-last-name">Last name</label>
+                <input
+                  id="settings-last-name"
+                  type="text"
+                  value={settingsLastName}
+                  onChange={(e) => setSettingsLastName(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="settings-phone">Phone number</label>
+                <input
+                  id="settings-phone"
+                  type="tel"
+                  value={settingsPhone}
+                  onChange={(e) => setSettingsPhone(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
                 <label htmlFor="settings-email">Email</label>
                 <input
                   id="settings-email"
                   type="email"
                   value={settingsEmail}
-                  onChange={(e) => setSettingsEmail(e.target.value)}
+                  readOnly
                 />
               </div>
 
-              <label className="settings-toggle">
-                <input
-                  type="checkbox"
-                  checked={notificationsOn}
-                  onChange={(e) => setNotificationsOn(e.target.checked)}
-                />
-                <span>Email notifications</span>
-              </label>
+              {profileError && <p className="error-message">{profileError}</p>}
 
               <button type="submit" className="auth-primary-button">
-                Save settings
+                Save profile
               </button>
             </form>
           </section>

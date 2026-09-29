@@ -1,43 +1,34 @@
 import { useState } from "react";
+import { resendVerification, verifyEmail } from "../api";
 
-function OTP({ onNavigate }) {
-  const [otp, setOtp] = useState("");
+function OTP({ onNavigate, email, token }) {
+  const [otp, setOtp] = useState(token || "");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
     setMessage("");
 
-    if (!otp) {
-      setError("Please enter the verification code.");
+    if (!otp.trim()) {
+      setError("Please enter the verification token.");
       return;
     }
 
-    if (otp.length !== 6) {
-      setError("Verification code must be 6 digits.");
-      return;
-    }
-
-    if (otp !== "123456") {
-      setError("Invalid verification code. Try 123456 for this demo.");
-      return;
-    }
-
-    setMessage("Code verified successfully.");
-
-    setTimeout(() => {
-      onNavigate("reset");
-    }, 700);
-  };
-
-  const handleOtpChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-
-    if (value.length <= 6) {
-      setOtp(value);
+    setSubmitting(true);
+    try {
+      const result = await verifyEmail(otp.trim());
+      setMessage(result.message);
+      setTimeout(() => {
+        onNavigate("login");
+      }, 700);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -86,23 +77,21 @@ function OTP({ onNavigate }) {
           <h2>Verify Your Identity</h2>
 
           <p className="otp-subtitle">
-            Enter the 6-digit verification code sent to your email address.
+            Enter the verification token sent to {email || "your email"}.
           </p>
 
           <form onSubmit={handleSubmit}>
             <label htmlFor="otp">
-              Verification Code
+              Verification token
             </label>
 
             <input
               id="otp"
-              className="otp-input"
+              className="otp-input token-input"
               type="text"
-              inputMode="numeric"
-              maxLength="6"
-              placeholder="••••••"
+              placeholder="Paste your verification token"
               value={otp}
-              onChange={handleOtpChange}
+              onChange={(e) => setOtp(e.target.value)}
               autoComplete="one-time-code"
             />
 
@@ -121,18 +110,34 @@ function OTP({ onNavigate }) {
             <button
               type="submit"
               className="otp-button"
+              disabled={submitting}
             >
-              Verify Code →
+              {submitting ? "Verifying..." : "Verify Email →"}
             </button>
           </form>
 
           <div className="otp-resend">
-            <span>Didn't receive the code?</span>
+            <span>Didn't receive the email?</span>
             <button
               type="button"
-              onClick={() => setMessage("A new verification code has been sent.")}
+              onClick={async () => {
+                setError("");
+                if (!email) {
+                  setError("Enter the email you registered with and try again.");
+                  return;
+                }
+                try {
+                  const result = await resendVerification(email);
+                  setMessage(result.message);
+                  if (result.data?.verificationToken) {
+                    setOtp(result.data.verificationToken);
+                  }
+                } catch (requestError) {
+                  setError(requestError.message);
+                }
+              }}
             >
-              Resend Code
+              Resend email
             </button>
           </div>
 
