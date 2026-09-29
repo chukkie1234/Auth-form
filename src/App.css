@@ -3155,34 +3155,95 @@ display: none;
 }
 
 .send-money-box {
-  width: 420px;
-  max-width: calc(100% - 40px);
+  width: 440px;
+  max-width: calc(100% - 32px);
+  max-height: min(88vh, 860px);
+  overflow: auto;
 
-  padding: 32px;
-  border-radius: 20px;
+  padding: 28px;
+  border-radius: 22px;
 
   background: #ffffff;
-  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.28);
 
   text-align: left;
 }
 
+.pay-bills-box {
+  width: min(680px, calc(100% - 32px));
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.modal-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: #5b4cf6;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .send-money-box h2 {
-  margin: 0 0 8px;
+  margin: 0;
 
   font-size: 26px;
   font-weight: 700;
   color: #111827;
 }
 
-.send-money-box p {
-  margin: 0 0 24px;
+.modal-close {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 
+  border: none;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #374151;
+
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: #e5e7eb;
+}
+
+.modal-subtitle {
+  margin: 0 0 22px;
   font-size: 15px;
   color: #6b7280;
 }
 
-.send-money-box input {
+.modal-error {
+  margin: -4px 0 14px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.modal-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.send-money-box {
+  color-scheme: light;
+}
+
+.send-money-box input,
+.send-money-box select {
   width: 100%;
   box-sizing: border-box;
 
@@ -3190,10 +3251,16 @@ display: none;
   margin-bottom: 14px;
 
   border: 1px solid #d1d5db;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111827;
 
   font-size: 15px;
   outline: none;
+}
+
+.send-money-box input::placeholder {
+  color: #9ca3af;
 }
 
 .send-money-box input:focus {
@@ -3213,25 +3280,32 @@ display: none;
   padding: 12px 20px;
 
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
 
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.send-money-actions button:first-child {
+.modal-btn-secondary {
   background: #f3f4f6;
   color: #374151;
 }
 
-.send-money-actions button:last-child {
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  color: #ffffff;
+.modal-btn-secondary:hover {
+  background: #e5e7eb;
 }
 
-.send-money-actions button:hover {
+.modal-btn-primary {
+  background: linear-gradient(135deg, #5b4cf6, #6d5dfc);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(91, 76, 246, 0.22);
+}
+
+.modal-btn-primary:hover,
+.modal-btn-secondary:hover {
   transform: translateY(-1px);
 }
 
@@ -3248,9 +3322,10 @@ display: none;
 }
 
 .bill-options button {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 12px;
   align-items: center;
-  gap: 12px;
 
   width: 100%;
   min-height: 72px;
@@ -3290,7 +3365,15 @@ display: none;
   transform: translateY(-1px);
 }
 
+.bill-options button.active {
+  border-color: #5b4cf6;
+  background: #f5f3ff;
+  box-shadow: 0 0 0 3px rgba(91, 76, 246, 0.16);
+}
+
 .bill-options button span {
+  grid-row: 1 / span 2;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3355,6 +3438,7 @@ display: none;
   color: #6b7280;
 }
 
+.bill-payment-form select,
 .bill-payment-form input {
   display: block;
 
@@ -3383,6 +3467,17 @@ display: none;
   color: #9ca3af;
 }
 
+.bill-payment-form select {
+  appearance: none;
+  margin-bottom: 14px;
+  background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.bill-payment-form select:focus,
 .bill-payment-form input:focus {
   border-color: #5b4cf6;
 
@@ -3470,4 +3565,153 @@ display: none;
   z-index: 10002 !important;
   pointer-events: auto !important;
   cursor: pointer !important;
+}
+
+.account-grid,
+.cards-page {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.account-card,
+.card-details-panel,
+.settings-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.account-card p,
+.card-details-panel p {
+  margin: 0 0 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.account-card h2,
+.card-details-panel h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #111827;
+}
+
+.account-card span {
+  display: block;
+  margin-bottom: 18px;
+  color: #6b7280;
+}
+
+.account-card strong {
+  font-size: 28px;
+  color: #111827;
+}
+
+.card-details-panel ul {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.card-details-panel li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.card-details-panel li span {
+  color: #6b7280;
+}
+
+.settings-panel {
+  max-width: 560px;
+}
+
+.settings-form .form-group {
+  margin-bottom: 16px;
+}
+
+.settings-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 20px;
+  color: #111827;
+}
+
+@media (max-width: 800px) {
+  .account-grid,
+  .cards-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10050;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: min(380px, calc(100% - 32px));
+  padding: 16px 16px 16px 18px;
+
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #bbf7d0;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.toast-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 700;
+}
+
+.toast-content strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #111827;
+  font-size: 14px;
+}
+
+.toast-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.toast-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
 }

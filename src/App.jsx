@@ -26,7 +26,7 @@ function App() {
     return <ResetPassword onNavigate={setPage} />;
   }
   if (page === "dashboard") {
-    return <Dashboard />;
+    return <Dashboard onNavigate={setPage} />;
   }
     return <Login onNavigate={setPage} />;
 }

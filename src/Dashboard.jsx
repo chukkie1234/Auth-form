@@ -12,6 +12,9 @@ function Dashboard({ onNavigate }) {
     localStorage.setItem("nexoraBalance", balance);
   }, [balance]);
 
+  const [showAddMoney, setShowAddMoney] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [addError, setAddError] = useState("");
   const [showSendMoney, setShowSendMoney] = useState(false);
   const [recipient, setRecipient] = useState("");
   const [sendAmount, setSendAmount] = useState("");
@@ -23,6 +26,46 @@ function Dashboard({ onNavigate }) {
   const [showCardDetails, setShowCardDetails] = useState(false);
   const [toast, setToast] = useState(null);
   const [toastTimer, setToastTimer] =useState(null);
+  const [section, setSection] = useState("dashboard");
+  const [settingsName, setSettingsName] = useState("Joshua");
+  const [settingsEmail, setSettingsEmail] = useState("joshua@nexora.com");
+  const [notificationsOn, setNotificationsOn] = useState(true);
+
+  const menuItems = [
+    { id: "dashboard", icon: "⌂", label: "Dashboard" },
+    { id: "accounts", icon: "▣", label: "Accounts" },
+    { id: "transactions", icon: "↔️", label: "Transactions" },
+    { id: "payments", icon: "↗️", label: "Payments" },
+    { id: "cards", icon: "▤", label: "Cards" },
+    { id: "settings", icon: "⚙️", label: "Settings" },
+  ];
+
+  const sectionCopy = {
+    dashboard: {
+      greeting: "Good morning 👋",
+      title: "Welcome back, Joshua",
+    },
+    accounts: {
+      greeting: "Accounts",
+      title: "Your accounts",
+    },
+    transactions: {
+      greeting: "Activity",
+      title: "Transactions",
+    },
+    payments: {
+      greeting: "Move money",
+      title: "Payments",
+    },
+    cards: {
+      greeting: "Cards",
+      title: "Your cards",
+    },
+    settings: {
+      greeting: "Preferences",
+      title: "Settings",
+    },
+  };
 const [transactions, setTransactions] = useState([
   {
     name: "Online Shopping",
@@ -57,24 +100,35 @@ const showToast = (type, title, message) => {
 
   setToastTimer(timer);
 };
+  const closeAddMoney = () => {
+    setShowAddMoney(false);
+    setAddAmount("");
+    setAddError("");
+  };
+
   const handleAddMoney = () => {
-   const amount = prompt("Enter amount to add:");
+    const numericAmount = Number(addAmount);
 
-  if (!amount) return;
+    if (!addAmount || Number.isNaN(numericAmount) || numericAmount <= 0) {
+      setAddError("Please enter a valid amount.");
+      return;
+    }
 
-  const numericAmount = Number(amount);
-
-  if (isNaN(numericAmount) || numericAmount <= 0) {
-    alert("Please enter a valid amount.");
-    return;
-  }
-
-  setBalance((currentBalance) => currentBalance + numericAmount);
-  showToast(
-    "success",
-    "Money Added Successfully!",
-     `₦${numericAmount.toLocaleString()} has been added to your account.`
-  );
+    setBalance((currentBalance) => currentBalance + numericAmount);
+    setTransactions((currentTransactions) => [
+      {
+        name: "Money Added",
+        amount: numericAmount,
+        time: "Just now",
+      },
+      ...currentTransactions,
+    ]);
+    showToast(
+      "success",
+      "Money Added Successfully!",
+      `₦${numericAmount.toLocaleString()} has been added to your account.`
+    );
+    closeAddMoney();
   };
 
    const handleSendMoney = () => {
@@ -209,35 +263,19 @@ return (
         </div>
 
         <nav className="dashboard-nav">
-          <button className="dashboard-nav-item active">
-            <span>⌂</span>
-            Dashboard
-          </button>
-
-          <button className="dashboard-nav-item">
-            <span>▣</span>
-            Accounts
-          </button>
-
-          <button className="dashboard-nav-item">
-            <span>↔️</span>
-            Transactions
-          </button>
-
-          <button className="dashboard-nav-item">
-            <span>↗️</span>
-            Payments
-          </button>
-
-          <button className="dashboard-nav-item">
-            <span>▤</span>
-            Cards
-          </button>
-
-          <button className="dashboard-nav-item">
-            <span>⚙️</span>
-            Settings
-          </button>
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`dashboard-nav-item${
+                section === item.id ? " active" : ""
+              }`}
+              onClick={() => setSection(item.id)}
+            >
+              <span>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
         </nav>
 
         <button
@@ -255,8 +293,8 @@ return (
         {/* HEADER */}
         <header className="dashboard-header">
           <div>
-            <p className="dashboard-greeting">Good morning 👋</p>
-            <h1>Welcome back, Joshua</h1>
+            <p className="dashboard-greeting">{sectionCopy[section].greeting}</p>
+            <h1>{sectionCopy[section].title}</h1>
           </div>
 
           <div className="dashboard-header-actions">
@@ -275,6 +313,7 @@ return (
         </header>
 
         {/* BALANCE CARD */}
+        {section === "dashboard" && (
         <section className="dashboard-balance-card">
           <div>
             <p>
@@ -304,13 +343,15 @@ return (
           <button
             type="button"
             className="balance-action"
-            onClick={handleAddMoney}
+            onClick={() => setShowAddMoney(true)}
           >
             + Add Money
           </button>
         </section>
+        )}
 
         {/* QUICK ACTIONS */}
+        {(section === "dashboard" || section === "payments") && (
         <section className="dashboard-section">
           <div className="dashboard-section-heading">
             <h2>Quick Actions</h2>
@@ -335,108 +376,195 @@ return (
               <small>Pay your bills</small>
             </button>
 
-            <button  onClick={handleAddMoney}>
+            <button onClick={() => setShowAddMoney(true)}>
               <span>＋</span>
               <strong>Add Money</strong>
               <small>Fund your account</small>
             </button>
           </div>
         </section>
+        )}
+
+        {showAddMoney && (
+          <div className="send-money-modal" onClick={closeAddMoney}>
+            <div className="send-money-box" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <span className="modal-kicker">Deposit</span>
+                  <h2>Add Money</h2>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close"
+                  aria-label="Close"
+                  onClick={closeAddMoney}
+                >
+                  ×
+                </button>
+              </div>
+
+              <p className="modal-subtitle">Enter the amount you want to add to your account.</p>
+
+              <label className="modal-label" htmlFor="add-amount">Amount</label>
+              <input
+                id="add-amount"
+                type="text"
+                inputMode="numeric"
+                placeholder="0.00"
+                value={addAmount}
+                onChange={(e) => {
+                  setAddAmount(e.target.value);
+                  setAddError("");
+                }}
+              />
+
+              {addError && <p className="modal-error">{addError}</p>}
+
+              <div className="send-money-actions">
+                <button type="button" className="modal-btn-secondary" onClick={closeAddMoney}>
+                  Cancel
+                </button>
+                <button type="button" className="modal-btn-primary" onClick={handleAddMoney}>
+                  Add Money
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SEND MONEY MODAL */}
         {showSendMoney && (
-          <div className="send-money-modal">
-            <div className="send-money-box">
-
-              <h2>Send Money</h2>
-
-               <p>Transfer money to another account.</p>
-
-               <input
-                 type="text"
-                 placeholder="Recipient name"
-                 value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                 
-              />
-
-              <input
-                type="text"
-                inputMode="numeric"
-                 placeholder="Amount"
-                 value={sendAmount}
-                 onChange={(e) => setSendAmount(e.target.value)}
-              />         
-
-              <div className="send-money-actions">
+          <div className="send-money-modal" onClick={() => setShowSendMoney(false)}>
+            <div className="send-money-box" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <span className="modal-kicker">Transfer</span>
+                  <h2>Send Money</h2>
+                </div>
                 <button
                   type="button"
+                  className="modal-close"
+                  aria-label="Close"
                   onClick={() => setShowSendMoney(false)}
                 >
-                   Cancel
+                  ×
                 </button>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={handleSendMoney}
-                >
+              <p className="modal-subtitle">Transfer money to another account.</p>
+
+              <label className="modal-label" htmlFor="send-recipient">Recipient</label>
+              <input
+                id="send-recipient"
+                type="text"
+                placeholder="Recipient name"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+              />
+
+              <label className="modal-label" htmlFor="send-amount">Amount</label>
+              <input
+                id="send-amount"
+                type="text"
+                inputMode="numeric"
+                placeholder="0.00"
+                value={sendAmount}
+                onChange={(e) => setSendAmount(e.target.value)}
+              />
+
+              <div className="send-money-actions">
+                <button type="button" className="modal-btn-secondary" onClick={() => setShowSendMoney(false)}>
+                  Cancel
+                </button>
+                <button type="button" className="modal-btn-primary" onClick={handleSendMoney}>
                   Send Money
                 </button>
-             </div>
-
-           </div>
-         </div>
+              </div>
+            </div>
+          </div>
         )}
         {/* RECEIVE MONEY MODAL */}
         {showReceiveMoney && (
-          <div className="send-money-modal">
-            <div className="send-money-box">
+          <div className="send-money-modal" onClick={() => setShowReceiveMoney(false)}>
+            <div className="send-money-box" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div>
+                  <span className="modal-kicker">Deposit</span>
+                  <h2>Receive Money</h2>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close"
+                  aria-label="Close"
+                  onClick={() => setShowReceiveMoney(false)}
+                >
+                  ×
+                </button>
+              </div>
 
-              <h2>Receive Money</h2>
+              <p className="modal-subtitle">Enter the amount you want to receive.</p>
 
-              <p>Enter the amount you want to receive.</p>
-
+              <label className="modal-label" htmlFor="receive-amount">Amount</label>
               <input
+                id="receive-amount"
                 type="text"
                 inputMode="numeric"
-                placeholder="Amount"
+                placeholder="0.00"
                 value={receiveAmount}
                 onChange={(e) => setReceiveAmount(e.target.value)}
               />
 
               <div className="send-money-actions">
-
-                <button
-                  type="button"
-                  onClick={() => setShowReceiveMoney(false)}
-                >
+                <button type="button" className="modal-btn-secondary" onClick={() => setShowReceiveMoney(false)}>
                   Cancel
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleReceiveMoney}
-                >
+                <button type="button" className="modal-btn-primary" onClick={handleReceiveMoney}>
                   Receive Money
                 </button>
               </div>
-
             </div>
           </div>
         )}
         {/* PAY BILLS MODAL */}
         {showPayBills && (
-          <div className="send-money-modal">
-            <div className="send-money-box">
+          <div
+            className="send-money-modal"
+            onClick={() => {
+              setShowPayBills(false);
+              setBillType("");
+              setBillAmount("");
+            }}
+          >
+            <div
+              className="send-money-box pay-bills-box"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <span className="modal-kicker">Bills</span>
+                  <h2>Pay Bills</h2>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close"
+                  aria-label="Close"
+                  onClick={() => {
+                    setShowPayBills(false);
+                    setBillType("");
+                    setBillAmount("");
+                  }}
+                >
+                  ×
+                </button>
+              </div>
 
-              <h2>Pay Bills</h2>
-
-              <p>Select the service you want to pay for.</p>
+              <p className="modal-subtitle">Select the service you want to pay for.</p>
 
               <div className="bill-options">
 
                 <button
                    type="button"
+                   className={billType === "Electricity" ? "active" : undefined}
                    onClick={() => setBillType("Electricity")}
                  >
                    <span>⚡</span>
@@ -446,6 +574,7 @@ return (
 
                  <button
                    type="button"
+                   className={billType === "airtime" ? "active" : undefined}
                    onClick={() => setBillType("airtime")}
                  >
                    <span>📱</span>
@@ -455,10 +584,8 @@ return (
 
                  <button
                    type="button"
-                   onClick={() => {
-                     setBillType("data");
-                     setShowPayBills(true);
-                   }}
+                   className={billType === "data" ? "active" : undefined}
+                   onClick={() => setBillType("data")}
                  >
                    <span>🌐</span>
                    <strong>Data</strong>
@@ -467,6 +594,7 @@ return (
 
                  <button
                    type="button"
+                   className={billType === "Cable TV" ? "active" : undefined}
                    onClick={() => setBillType("Cable TV")}
                  >
                    <span>📺</span>
@@ -476,10 +604,8 @@ return (
 
                  <button
                    type="button"
-                   onClick={() => {
-                     setBillType("Water");
-                     setShowPayBills(true);
-                   }}
+                   className={billType === "Water" ? "active" : undefined}
+                   onClick={() => setBillType("Water")}
                  >
                    <span>💧</span>
                    <strong>Water</strong>
@@ -488,6 +614,7 @@ return (
 
                  <button
                    type="button"
+                   className={billType === "Internet" ? "active" : undefined}
                    onClick={() => setBillType("Internet")}
                  >
                   <span>📡</span>
@@ -512,7 +639,7 @@ return (
                   <input
                     type="number"
                     placeholder="Amount"
-                    Value={billAmount}
+                    value={billAmount}
                     onChange={(e) => setBillAmount(e.target.value)}
                   />
 
@@ -525,7 +652,6 @@ return (
 
                  </div>
               )}
-              </div>
 
              {/* AIRTIME PAYMENT FORM */}
 
@@ -676,22 +802,25 @@ return (
               </button>
              </div>
            )}
-           <button
-             type="button"
-             onClick={() => {
-               setShowPayBills(false);
-               setBillType("");
-               setBillAmount("");
-            }}
-           >
-             Cancel
-            </button>
+           <div className="send-money-actions">
+             <button
+               type="button"
+               className="modal-btn-secondary"
+               onClick={() => {
+                 setShowPayBills(false);
+                 setBillType("");
+                 setBillAmount("");
+               }}
+             >
+               Cancel
+             </button>
+           </div>
             </div>
-         
+          </div>
         )}
        
         {/* OVERVIEW */}
-    
+        {section === "dashboard" && (
         <section className="dashboard-overview">
 
           <div className="dashboard-panel">
@@ -783,8 +912,10 @@ return (
             )}
            </div>
         </section>
+        )}
 
         {/* TRANSACTIONS */}
+        {(section === "dashboard" || section === "transactions") && (
         <section className="dashboard-panel transactions-panel">
 
           <div className="dashboard-section-heading">
@@ -830,6 +961,102 @@ return (
     </div>
 
         </section>
+        )}
+
+        {section === "accounts" && (
+          <section className="account-grid">
+            <article className="account-card">
+              <p>Checking</p>
+              <h2>Personal Account</h2>
+              <span>•••• 4821</span>
+              <strong>
+                ₦{balance.toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+              </strong>
+            </article>
+
+            <article className="account-card">
+              <p>Savings</p>
+              <h2>Goal Savings</h2>
+              <span>•••• 9012</span>
+              <strong>₦850,000.00</strong>
+            </article>
+          </section>
+        )}
+
+        {section === "cards" && (
+          <section className="cards-page">
+            <div className="bank-card">
+              <div className="bank-card-top">
+                <strong>Nexora</strong>
+                <span>VISA</span>
+              </div>
+              <p className="bank-card-number">•••• •••• •••• 4821</p>
+              <div className="bank-card-bottom">
+                <span>JOSHUA</span>
+                <span>12/29</span>
+              </div>
+            </div>
+
+            <div className="dashboard-panel card-details-panel">
+              <h2>Card details</h2>
+              <p>Primary debit card linked to your personal account.</p>
+              <ul>
+                <li><span>Status</span><strong>Active</strong></li>
+                <li><span>Daily limit</span><strong>₦500,000</strong></li>
+                <li><span>Billing address</span><strong>Lagos, Nigeria</strong></li>
+              </ul>
+            </div>
+          </section>
+        )}
+
+        {section === "settings" && (
+          <section className="dashboard-panel settings-panel">
+            <form
+              className="settings-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                showToast(
+                  "success",
+                  "Settings saved",
+                  "Your preferences have been updated."
+                );
+              }}
+            >
+              <div className="form-group">
+                <label htmlFor="settings-name">Display name</label>
+                <input
+                  id="settings-name"
+                  type="text"
+                  value={settingsName}
+                  onChange={(e) => setSettingsName(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="settings-email">Email</label>
+                <input
+                  id="settings-email"
+                  type="email"
+                  value={settingsEmail}
+                  onChange={(e) => setSettingsEmail(e.target.value)}
+                />
+              </div>
+
+              <label className="settings-toggle">
+                <input
+                  type="checkbox"
+                  checked={notificationsOn}
+                  onChange={(e) => setNotificationsOn(e.target.checked)}
+                />
+                <span>Email notifications</span>
+              </label>
+
+              <button type="submit" className="auth-primary-button">
+                Save settings
+              </button>
+            </form>
+          </section>
+        )}
 
       </main>
     </div>
