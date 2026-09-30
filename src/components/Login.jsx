@@ -39,6 +39,7 @@ function Login( { onNavigate }) {
     setSubmitting(true);
     try {
       const result = await loginAccount(identifier, password);
+      console.log("LOGIN RESULT:", result);
       setToken(result.data?.accessToken);
       onNavigate("dashboard");
     } catch (error) {
@@ -367,7 +368,7 @@ function Login( { onNavigate }) {
 
           <button
             type="button"
-            onClick={() => alert("Google login clicked")}
+            onClick={() => window.open("https://accounts.google.com/", "_blank")}
           >
             
             <FaGoogle />
@@ -376,7 +377,7 @@ function Login( { onNavigate }) {
           
           <button
             type="button"
-            onClick={() => alert("Apple login clicked")}
+            onClick={() => window.open("https://account.apple.com/","_blank")}
           >
             <FaApple />
             <span>Apple</span>
@@ -384,7 +385,7 @@ function Login( { onNavigate }) {
 
           <button
              type="button"
-             onClick={() => alert("GitHub login clicked")}
+             onClick={() => window.open("https://github.com/login", "_blank")}
           >
              <FaGithub />
             <span>GitHub</span>
@@ -392,7 +393,7 @@ function Login( { onNavigate }) {
 
           <button
             type="button"
-            onClick={() => alert("LinkedIn login clicked")}
+            onClick={() => window.open("https://linkedin.com/login", "_blank")}
           >
             <FaLinkedin />
             <span>LinkedIn</span>
