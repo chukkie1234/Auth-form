@@ -251,8 +251,8 @@ const showToast = (type, title, message) => {
 
       showToast(
         "success",
-        ` ${service} Payment Successful!,`
-        ` ₦${amount.toLocaleString("en-NG")} payment was successful.`
+        `${service} Payment Successful!`,
+        `₦${amount.toLocaleString("en-NG")} payment was successful.`
       );
 
       setBillAmount("");
