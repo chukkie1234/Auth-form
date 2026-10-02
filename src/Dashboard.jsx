@@ -121,15 +121,25 @@ function Dashboard({ onNavigate, theme, setTheme }) {
     { id: "settings", icon: "⚙️", label: "Settings" },
   ];
 
+  
   const sectionCopy = {
     dashboard: {
-      greeting: "Good morning 👋",
-      title: "Welcome back, Joshua",
+        greeting:
+            new Date().getHours() < 12
+                ? "Good morning 👋"
+                : new Date().getHours() < 17
+                ? "Good afternoon 👋"
+                : new Date().getHours() < 21
+                ? "Good evening 👋"
+                : "Good night 🌙",
+        title: "Welcome back, Joshua",
     },
+
     accounts: {
-      greeting: "Accounts",
-      title: "Your accounts",
+        greeting: "Accounts",
+        title: "Your accounts",
     },
+
     transactions: {
       greeting: "Activity",
       title: "Transactions",
