@@ -844,7 +844,7 @@ position: absolute;
 top: 45px;
 right: 0px;
 width: 320px;
-height: 190spx;
+height: 190px;
 border-radius: 20px;
 overflow: hidden;
 
@@ -3729,4 +3729,169 @@ display: none;
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
+}
+
+/* =========================================================
+   NEXORA DASHBOARD - DARK MODE
+   ========================================================= */
+
+body[data-theme="dark"] {
+  background: #0b1020;
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .dashboard-page {
+  background: #0b1020;
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .dashboard-main {
+  background: #0b1020;
+}
+
+body[data-theme="dark"] .dashboard-header h1 {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .dashboard-greeting {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .dashboard-notification {
+  background: #111827;
+  border-color: #273244;
+  color: #ffffff;
+}
+
+body[data-theme="dark"] .dashboard-profile strong {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .dashboard-profile span {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .dashboard-section-heading h2 {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .dashboard-section-heading p {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .quick-actions button {
+  background: #111827;
+  border-color: #273244;
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .quick-actions button strong {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .quick-actions button small {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .dashboard-panel {
+  background: #111827;
+  border-color: #273244;
+}
+
+body[data-theme="dark"] .overview-stats > div {
+  background: #172033;
+  border-color: #273244;
+}
+
+body[data-theme="dark"] .overview-stats span {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .overview-stats strong {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .dashboard-chart {
+  background: linear-gradient(
+    to bottom,
+    #172033,
+    #111827
+  );
+  border-color: #273244;
+}
+
+body[data-theme="dark"] .chart-line {
+  background: #273244;
+}
+
+body[data-theme="dark"] .transactions-panel {
+  background: #111827;
+  border-color: #273244;
+}
+
+body[data-theme="dark"] .transactions-panel .dashboard-section-heading h2 {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .transactions-panel .dashboard-section-heading p {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .transaction {
+  border-top-color: #273244;
+}
+
+body[data-theme="dark"] .transaction:hover {
+  background: #172033;
+}
+
+body[data-theme="dark"] .transaction-info strong {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .transaction-info span {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .account-card,
+body[data-theme="dark"] .card-details-panel,
+body[data-theme="dark"] .settings-panel {
+  background: #111827;
+  border-color: #273244;
+}
+
+body[data-theme="dark"] .account-card h2,
+body[data-theme="dark"] .card-details-panel h2 {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .account-card p,
+body[data-theme="dark"] .card-details-panel p,
+body[data-theme="dark"] .account-card span {
+  color: #94a3b8;
+}
+
+body[data-theme="dark"] .account-card strong {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .card-details-panel li {
+  border-top-color: #273244;
+}
+
+body[data-theme="dark"] .settings-toggle {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .toast-notification {
+  background: #111827;
+  border-color: #166534;
+}
+
+body[data-theme="dark"] .toast-content strong {
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .toast-content p {
+  color: #94a3b8;
 }

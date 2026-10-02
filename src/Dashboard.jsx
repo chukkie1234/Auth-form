@@ -1,7 +1,60 @@
 import { useState, useEffect } from "react";
 import { getCurrentUser, logoutAccount, setToken, updateProfile } from "./api";
 
-function Dashboard({ onNavigate }) {
+function Dashboard({ onNavigate, theme, setTheme }) {
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) {
+      return "Good morning";
+    } else if (hour >= 12 && hour < 17) {
+      return "Good afternoon";
+    } else if (hour >= 17 && hour < 21) {
+      return "Good evening";
+    } else {
+      return "Good night";
+    }
+  };
+
+  const [greeting, setGreeting] = useState(getGreeting());
+
+  const [currentTime, setCurrentTime] = useState(
+    new Date(). toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  );  
+  
+    // Update the time every second
+    useEffect(() => {
+      const updateTime = () => {
+        setCurrentTime(
+          new Date().toLocaleTimeString([], {
+           hour: "2-digit",
+           minute: "2-digit",
+         })
+        );
+      };
+
+      updateTime();
+
+      const timer = setInterval(updateTime, 1000);
+
+      return () => clearInterval(timer);
+   }, []);
+
+   // Update the greeting every minute
+   useEffect(() => {
+     const updateGreeting = () => {
+       setGreeting(getGreeting());
+    };
+
+     updateGreeting();
+
+     const timer = setInterval(updateGreeting, 60000);
+
+     return () => clearInterval(timer);
+   }, []);
   const [showBalance, setShowBalance] = useState(true);
 
   const [balance, setBalance] = useState(() => {
@@ -329,17 +382,35 @@ return (
         {/* HEADER */}
         <header className="dashboard-header">
           <div>
-            <p className="dashboard-greeting">{sectionCopy[section].greeting}</p>
-            <h1>
-              {section === "dashboard"
-                ? `Welcome back, ${user?.firstName || "there"}`
-                : sectionCopy[section].title}
+            <p className="dashboard-greeting">
+              {sectionCopy[section].greeting}
+           </p>
+
+           <p className="dashboard-time">
+              {currentTime}
+           </p>
+
+           <h1>
+             {section === "dashboard"
+               ? `Welcome back, ${user?.firstName || "there"}`
+               : sectionCopy[section].title}
             </h1>
           </div>
 
           <div className="dashboard-header-actions">
+
+            {/* LIGHT / DARK MODE TOGGLE */}
+            <button
+              type="button"
+              className="dashboard-theme-toggle"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              aria-label="Toggle light and dark mode"
+            >
+              {theme === "light" ? "🌙" : "☀️"}
+            </button>
+
             <button className="dashboard-notification">
-              🔔
+             🔔
             </button>
 
             <div className="dashboard-profile">

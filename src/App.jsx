@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Login from "./components/Login";
 import ForgotPassword from "./components/ForgotPassword";
 import Register from "./components/Register";
@@ -11,6 +11,15 @@ import "./App.css";
 function App() {
   const [page, setPage] = useState(() => (getToken() ? "dashboard" : "login"));
   const [authDraft, setAuthDraft] = useState({ email: "", token: "" });
+
+  const [ theme, setTheme] = useState(() => {
+    return localStorage.getItem("nexora-theme") || "light";
+  });
+
+  useEffect(() => {
+    document.body.setAttribute("data-theme", theme);
+    localStorage.setItem("nexora-theme", theme);
+  },  [theme]);
 
   const navigate = (nextPage, draft) => {
     if (draft) {
@@ -41,7 +50,13 @@ function App() {
     return <ResetPassword onNavigate={navigate} token={authDraft.token} />;
   }
   if (page === "dashboard") {
-    return <Dashboard onNavigate={navigate} />;
+    return (
+      <Dashboard
+        onNavigate={navigate}
+        theme={theme}
+        setTheme={setTheme}
+      />
+    );
   }
   return <Login onNavigate={navigate} />;
 }
