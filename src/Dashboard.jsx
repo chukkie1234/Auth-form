@@ -1037,12 +1037,15 @@ return (
               <h2>Recent Transactions</h2>
             </div>
 
-            <button 
-              className="view-button"
-              onClick={() => alert("Showing all recent transactions")}
-            >
-              View All
-            </button>
+            {section === "dashboard" && (
+              <button
+                type="button"
+                className="view-button"
+                onClick={() => setSection("transactions")}
+               >
+                View All
+              </button>
+           )}
           </div>
 
          <div className="transaction-list">
